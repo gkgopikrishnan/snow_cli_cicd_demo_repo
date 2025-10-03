@@ -1,0 +1,62 @@
+name: Deploy to Snowflake with Direct Creds (Dev)
+
+on:
+  push:
+    branches:
+      - emp_dev_main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python & Install Snowflake CLI
+        run: |
+          set -x
+          python3 -m pip install --upgrade pip
+          pip install snowflake-cli-labs
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          hash -r
+          snow --version || echo "Snow CLI not found"
+
+      - name: Run Snowflake deploy
+        run: |
+          set -e
+          # Fail fast if required env vars are missing
+          : "${SNOWFLAKE_ACCOUNT:?Missing SNOWFLAKE_ACCOUNT}"
+          : "${SNOWFLAKE_USER:?Missing SNOWFLAKE_USER}"
+          : "${SNOWFLAKE_PASSWORD:?Missing SNOWFLAKE_PASSWORD}"
+          : "${SNOWFLAKE_ROLE:?Missing SNOWFLAKE_ROLE}"
+          : "${SNOWFLAKE_WAREHOUSE:?Missing SNOWFLAKE_WAREHOUSE}"
+          : "${SNOWFLAKE_DATABASE:?Missing SNOWFLAKE_DATABASE}"
+          : "${SNOWFLAKE_SCHEMA:?Missing SNOWFLAKE_SCHEMA}"
+
+          echo "🔁 Running Snowflake deploy script via Snow CLI with temporary connection..."
+          snow sql \
+            --temporary-connection \
+            --account "$SNOWFLAKE_ACCOUNT" \
+            --user "$SNOWFLAKE_USER" \
+            --password "$SNOWFLAKE_PASSWORD" \
+            --role "$SNOWFLAKE_ROLE" \
+            --warehouse "$SNOWFLAKE_WAREHOUSE" \
+            --database "$SNOWFLAKE_DATABASE" \
+            --schema "$SNOWFLAKE_SCHEMA" \
+            --filename deploy/main_deploy.sql
+          ret=$?
+          echo "Snowflake CLI exit code: $ret"
+          if [ $ret -ne 0 ]; then
+            echo "❌ Snowflake CLI execution failed"
+            exit $ret
+          else
+            echo "✅ Snowflake CLI executed successfully"
+          fi
+        env:
+          SNOWFLAKE_ACCOUNT: BDXRNPG-JN71181
+          SNOWFLAKE_USER: SFTRAINING
+          SNOWFLAKE_PASSWORD: GoodSuperluck2025
+          SNOWFLAKE_ROLE: ACCOUNTADMIN
+          SNOWFLAKE_WAREHOUSE: COMPUTE_WH
+          SNOWFLAKE_DATABASE: CICD_DEV_EMP_DB
+          SNOWFLAKE_SCHEMA: CICD_DEV_EMP_DB_SCH
