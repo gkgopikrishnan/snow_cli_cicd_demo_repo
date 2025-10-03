@@ -58,5 +58,5 @@ jobs:
           SNOWFLAKE_PASSWORD: GoodSuperluck2025
           SNOWFLAKE_ROLE: ACCOUNTADMIN
           SNOWFLAKE_WAREHOUSE: COMPUTE_WH
-          SNOWFLAKE_DATABASE: snow_cli_cicd_demo_dev_db
-          SNOWFLAKE_SCHEMA: snow_cli_cicd_demo_dev_db_sch
+          SNOWFLAKE_DATABASE: CICD_DEV_EMP_DB
+          SNOWFLAKE_SCHEMA: CICD_DEV_EMP_DB_SCH
