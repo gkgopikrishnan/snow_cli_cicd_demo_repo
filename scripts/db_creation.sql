@@ -1,0 +1,3 @@
+drop database snow_cli_cicd_demo_db;
+CREATE DATABASE snow_cli_cicd_demo_dev_db;
+CREATE schema snow_cli_cicd_demo_dev_db_sch;
